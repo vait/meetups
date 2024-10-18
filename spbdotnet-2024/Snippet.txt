@@ -1,0 +1,43 @@
+--Для старого winDbg
+
+.sympath C:\path-to-folder\Symbols;srv*C:\path-to-folder\Symbols\ms*http://msdl.microsoft.com/download/symbols //Куда сохраняются символы
+.reload -f //Перечитываем пути
+.extpath "C:\path-to-folder\Symbols\" //папка для расширений
+.load  C:\path-to-folder\Symbols\sos.dll //Загружаем расширение с SOS
+!analyze -v //Запускаем анализ дампа
+.load sosex //Загружаем расширения sosex
+!bhi //BuildHeapIndex - Построение индекса объектов в куче (sosex)
+!DumpHeap -stat //Статистика по куче (чего и сколько используется)
+
+--Для нового WinDbg
+!analyze -v //Подгрузит все символы и проанализирует дамп.
+!DumpHeap -stat //Статистика по куче (чего и сколько используется)
+
+
+!Threads //Печатает информацию о потоках (их тип, локи, исключения, адреса)
+
+~*e!clrstack //Выводит тсеки всех потоков
+
+~~[OSID]s //Делает поток с OSID текущим
+
+!CLRStack -p //Печать стека текущего потока с расшифровкой и ссылками на объекты
+
+!do <addr> //Печатает объект с полями
+Fields:
+              MT    Field   Offset                 Type VT     Attr            Value Name
+00007ff97bb35678  400001a        8        System.Object  0 instance 00000237066b8888 _locker
+00007ff97c4bc368  400001b       10 ...Private.CoreLib]]  0 instance 00000237066b8808 _valueFactory
+00007ff97bc80cc8  400001c       28      System.DateTime  1 instance 00000237066b8870 _expiresAt
+00007ff97dcfe5c0  400001d       18 ...Private.CoreLib]]  0 instance 000002370635feb0 _expirationCondition
+00007ff97bb35678  400001e       20        System.Object  0 instance 0000000000000000 _value
+00007ff97bc80cc8  400001f       30      System.DateTime  1 instance 00000237066b8878 <GettingAt>k__BackingField
+
+!DumpVC /d 00007ff97bc80cc8 00000237066b8870 //Печатаем тип DateTime по адресу 00000237066b8870
+
+--Вывод
+Fields:
+              MT    Field   Offset                 Type VT     Attr            Value Name
+00007ff97bbdc9d8  4000394        0        System.UInt64  1 instance 5250091969779806680 _dateData
+
+//Чтобы сделать дату понятной в C#
+Console.WriteLine(DateTime.FromBinary((long)(_dateData & 0x3FFFFFFFFFFFFFFF))); // Выводим
